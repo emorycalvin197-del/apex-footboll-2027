@@ -1,0 +1,1159 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Apex Football 2027 - Official Edition</title>
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
+        body { background: #060913; color: #fff; height: 100vh; width: 100vw; overflow: hidden; display: flex; flex-direction: column; }
+        
+        /* Landscape Orientation Enforcement */
+        @media screen and (orientation: portrait) {
+            #rotate-warning { display: flex !important; }
+        }
+        #rotate-warning { position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: #060913; z-index: 9999; display: none; flex-direction: column; justify-content: center; align-items: center; text-align: center; padding: 20px; }
+        #rotate-warning h2 { color: #38bdf8; margin-bottom: 10px; }
+
+        /* Splash Screen */
+        #splash-screen { position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: radial-gradient(circle at center, #0f172a 0%, #030712 100%); z-index: 9998; display: flex; flex-direction: column; justify-content: center; align-items: center; transition: opacity 0.8s ease; }
+        .splash-logo { font-size: 2.8rem; font-weight: 900; color: #38bdf8; text-shadow: 0 0 25px rgba(56,189,248,0.6); animation: pulseLogo 1.5s infinite alternate; letter-spacing: 2px; display: flex; align-items: center; gap: 12px; }
+        @keyframes pulseLogo { 0% { transform: scale(1); opacity: 0.85; } 100% { transform: scale(1.05); opacity: 1; } }
+        
+        .splash-admin-btn { position: absolute; bottom: 25px; right: 25px; background: rgba(30, 41, 59, 0.8); border: 1px solid #334155; color: #38bdf8; padding: 10px 14px; border-radius: 10px; cursor: pointer; font-size: 1.3rem; transition: 0.2s; user-select: none; display: flex; align-items: center; gap: 8px; font-weight: bold; }
+        .splash-admin-btn:hover { background: #38bdf8; color: #060913; border-color: #38bdf8; }
+
+        /* Navbar */
+        header { background: #0b0f19; padding: 10px 25px; display: flex; justify-content: space-between; align-items: center; border-bottom: 2px solid #1e293b; height: 65px; }
+        .logo { font-size: 1.3rem; font-weight: 800; color: #f8fafc; display: flex; align-items: center; gap: 12px; user-select: none; letter-spacing: 0.5px; }
+        .logo-badge { display: flex; align-items: center; justify-content: center; width: 42px; height: 42px; background: linear-gradient(135deg, #0284c7 0%, #0f172a 100%); border: 2px solid #38bdf8; border-radius: 10px; box-shadow: 0 0 12px rgba(56, 189, 248, 0.4); }
+        .user-info { display: flex; gap: 10px; align-items: center; font-size: 0.82rem; }
+        .coin-badge { background: #eab308; color: #000; padding: 4px 10px; border-radius: 20px; font-weight: bold; }
+        .gp-badge { background: #3b82f6; color: #fff; padding: 4px 10px; border-radius: 20px; font-weight: bold; }
+        .strength-badge { background: linear-gradient(135deg, #a855f7, #6366f1); color: #fff; padding: 4px 10px; border-radius: 20px; font-weight: bold; box-shadow: 0 0 10px rgba(168, 85, 247, 0.4); }
+        .id-badge { background: #1e293b; color: #38bdf8; padding: 4px 10px; border-radius: 6px; font-family: monospace; border: 1px solid #334155; }
+
+        /* Container */
+        .container { flex: 1; display: flex; position: relative; overflow: hidden; height: calc(100vh - 65px); }
+        
+        /* Sidebar */
+        nav { width: 230px; background: #0b0f19; display: flex; flex-direction: column; padding: 10px 0; border-right: 2px solid #1e293b; overflow-y: auto; }
+        nav button { background: none; border: none; color: #94a3b8; text-align: left; padding: 11px 18px; font-size: 0.9rem; cursor: pointer; transition: 0.2s; border-left: 4px solid transparent; font-weight: 500; }
+        nav button:hover, nav button.active { background: #1e293b; color: #38bdf8; border-left-color: #38bdf8; }
+
+        /* Panels */
+        .content { flex: 1; padding: 20px 30px; overflow-y: auto; display: none; background: radial-gradient(circle at center, #0f172a 0%, #060913 100%); }
+        .content.active { display: block; }
+        h2 { margin-bottom: 15px; color: #f8fafc; border-bottom: 2px solid #1e293b; padding-bottom: 8px; font-size: 1.4rem; }
+
+        /* Grid & Cards */
+        .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(210px, 1fr)); gap: 15px; }
+        .card { background: #0f172a; border-radius: 12px; padding: 15px; border: 1px solid #1e293b; position: relative; box-shadow: 0 4px 6px rgba(0,0,0,0.4); text-align: center; cursor: pointer; transition: transform 0.2s; }
+        .card:hover { transform: translateY(-3px); border-color: #38bdf8; }
+        .card.epic { border: 2px solid #eab308; background: linear-gradient(135deg, #0f172a 0%, #2e2804 100%); box-shadow: 0 0 15px rgba(234, 179, 8, 0.3); }
+        .avatar-img { width: 75px; height: 75px; border-radius: 50%; border: 3px solid #38bdf8; margin: 0 auto 8px auto; display: block; background: #1e293b; object-fit: cover; }
+        .card.epic .avatar-img { border-color: #eab308; }
+        .rating-badge { position: absolute; top: 12px; right: 12px; background: #38bdf8; color: #000; font-weight: bold; padding: 3px 8px; border-radius: 6px; font-size: 0.85rem; }
+        .card.epic .rating-badge { background: #eab308; }
+        .boost-tag { display: inline-block; background: #a855f7; color: #fff; font-size: 0.7rem; padding: 2px 6px; border-radius: 4px; font-weight: bold; margin-top: 4px; }
+
+        /* Buttons */
+        .btn { background: #38bdf8; color: #060913; border: none; padding: 10px 16px; font-weight: bold; border-radius: 8px; cursor: pointer; margin-top: 10px; width: 100%; transition: 0.2s; font-size: 0.95rem; }
+        .btn:hover { background: #0ea5e9; }
+        .btn-green { background: #22c55e; color: #fff; }
+        .btn-green:hover { background: #16a34a; }
+        .btn-mpesa { background: #10b981; color: #fff; }
+
+        .music-bar { background: #131b2e; border: 1px solid #334155; padding: 8px 15px; border-radius: 8px; display: flex; align-items: center; justify-content: space-between; margin-bottom: 15px; font-size: 0.9rem; }
+
+        /* Modals */
+        .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.88); z-index: 1000; display: flex; justify-content: center; align-items: center; }
+        .modal { background: #0f172a; padding: 30px; border-radius: 16px; width: 520px; border: 2px solid #334155; text-align: center; max-height: 90vh; overflow-y: auto; }
+        .modal input, .modal select { width: 100%; padding: 10px; margin: 8px 0; background: #060913; border: 1px solid #334155; border-radius: 8px; color: #fff; font-size: 0.95rem; }
+        .hidden { display: none !important; }
+
+        /* Gacha Animation Card */
+        #gacha-reveal-modal { background: radial-gradient(circle at center, #1e293b 0%, #020617 100%); }
+        .gacha-card-box { width: 220px; height: 320px; background: linear-gradient(135deg, #eab308 0%, #ca8a04 100%); border-radius: 16px; padding: 20px; margin: 20px auto; color: #000; display: flex; flex-direction: column; align-items: center; justify-content: center; box-shadow: 0 0 30px #eab308; animation: bounceCard 0.8s ease; }
+        @keyframes bounceCard { 0% { transform: scale(0.2) rotateY(180deg); } 100% { transform: scale(1) rotateY(0deg); } }
+
+        /* Pre-Match Lineup Screen */
+        #lineup-screen { position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: #060913; z-index: 1500; display: flex; flex-direction: column; justify-content: center; align-items: center; padding: 20px; display: none; }
+        .lineup-card { background: #0f172a; border: 2px solid #38bdf8; border-radius: 12px; padding: 20px; width: 650px; text-align: left; }
+
+        /* Match Arena Overlay */
+        #match-overlay { position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: #060913; z-index: 2000; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 15px; display: none; }
+        .scoreboard { background: #0f172a; border: 2px solid #38bdf8; border-radius: 12px; padding: 10px 25px; display: flex; gap: 25px; align-items: center; font-size: 1.3rem; font-weight: bold; margin-bottom: 10px; }
+        .match-clock { background: #eab308; color: #000; padding: 4px 10px; border-radius: 6px; font-family: monospace; }
+        
+        .pitch-view { width: 100%; max-width: 850px; height: 260px; background: #15803d; border: 3px solid #fff; border-radius: 12px; position: relative; overflow: hidden; display: flex; justify-content: center; align-items: center; flex-direction: column; box-shadow: inset 0 0 50px rgba(0,0,0,0.5); }
+        .pitch-center-circle { width: 90px; height: 90px; border: 2px solid rgba(255,255,255,0.6); border-radius: 50%; position: absolute; }
+        .pitch-half-line { width: 2px; height: 100%; background: rgba(255,255,255,0.6); position: absolute; }
+        
+        .drama-badge { background: #ef4444; color: #fff; padding: 6px 14px; border-radius: 20px; font-weight: bold; animation: pulse 1s infinite; z-index: 20; display: none; }
+        @keyframes pulse { 0% { transform: scale(1); } 50% { transform: scale(1.08); } 100% { transform: scale(1); } }
+
+        /* Emojis & Controls */
+        .emoji-bar { position: absolute; top: 12px; right: 12px; display: flex; gap: 6px; background: rgba(15, 23, 42, 0.85); border: 1px solid #334155; padding: 6px 10px; border-radius: 20px; z-index: 40; }
+        .emoji-btn { background: none; border: none; font-size: 1.3rem; cursor: pointer; transition: transform 0.1s; }
+        .emoji-btn:hover { transform: scale(1.3); }
+
+        .floating-emoji { position: absolute; font-size: 2.5rem; z-index: 50; animation: floatUp 1.8s ease-out forwards; pointer-events: none; }
+        @keyframes floatUp { 0% { opacity: 1; transform: translateY(0) scale(0.6); } 100% { opacity: 0; transform: translateY(-80px) scale(1.4); } }
+
+        .controls-overlay { position: absolute; bottom: 10px; width: 100%; padding: 0 20px; display: flex; justify-content: space-between; align-items: center; z-index: 25; pointer-events: auto; }
+        .dpad-container { width: 90px; height: 90px; border: 2px dashed rgba(255,255,255,0.5); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 0.75rem; color: #fff; background: rgba(0,0,0,0.3); }
+        .action-btns { display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px; }
+        .control-btn { background: rgba(56, 189, 248, 0.85); color: #000; border: none; padding: 8px 12px; border-radius: 8px; font-weight: bold; font-size: 0.75rem; cursor: pointer; user-select: none; }
+        .control-btn:active { background: #eab308; }
+
+        #var-overlay, #halftime-overlay, #motm-overlay { position: absolute; width: 100%; height: 100%; background: rgba(0, 0, 0, 0.92); display: flex; flex-direction: column; justify-content: center; align-items: center; z-index: 30; display: none; }
+        .var-box { border: 3px solid #eab308; padding: 20px; border-radius: 12px; text-align: center; background: #0f172a; width: 450px; }
+
+        .commentary-box { background: #0f172a; border: 1px solid #334155; padding: 10px 15px; border-radius: 8px; height: 85px; width: 100%; max-width: 850px; overflow-y: auto; font-family: monospace; color: #38bdf8; margin-top: 8px; font-size: 0.85rem; }
+    </style>
+</head>
+<body>
+
+    <!-- 1. SPLASH SCREEN -->
+    <div id="splash-screen">
+        <div class="splash-logo">
+            <svg width="45" height="45" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M50 5 L90 25 L90 75 L50 95 L10 75 L10 25 Z" fill="#0284c7" stroke="#eab308" stroke-width="4"/>
+                <path d="M50 15 L75 80 L62 80 L50 45 L38 80 L25 80 Z" fill="#ffffff"/>
+                <polygon points="50,22 55,35 68,35 57,43 61,56 50,48 39,56 43,43 32,35 45,35" fill="#eab308"/>
+            </svg>
+            <span id="splash-title-text">APEX FOOTBALL 2027</span>
+        </div>
+        <p style="color: #94a3b8; margin-top: 10px; font-size: 1.1rem; letter-spacing: 3px;" id="splash-studio-text">CALVIN STUDIOS • UNREAL ENGINE</p>
+        
+        <button class="btn btn-green" style="width: 240px; margin-top: 25px; padding: 12px;" onclick="enterGameFromSplash()">Enter Pitch & Play</button>
+
+        <div class="splash-admin-btn" onclick="openSplashAdmin()" title="Author Admin Panel">
+            ≡ Admin
+        </div>
+    </div>
+
+    <!-- 2. AUTHOR ADMIN MODAL -->
+    <div id="splash-admin-modal" class="modal-overlay hidden">
+        <div class="modal" style="width: 680px; text-align: left;">
+            <h2 style="color: #38bdf8; text-align: center; margin-bottom: 15px;">⚙️ Master Admin Control Panel</h2>
+            <div style="display: flex; flex-direction: column; gap: 12px; max-height: 70vh; overflow-y: auto; padding-right: 5px;">
+                
+                <div style="background: #060913; padding: 12px; border-radius: 8px; border: 1px solid #38bdf8;">
+                    <h3 style="color:#38bdf8;">👔 Manager & +1 Booster Config</h3>
+                    <label style="font-size: 0.85rem;">Manager Name:</label>
+                    <input type="text" id="admin-mgr-name" value="Jürgen Klopp" style="margin: 4px 0 8px 0;">
+                    <label style="font-size: 0.85rem;">Manager Playstyle (Quick Counter / Possession):</label>
+                    <input type="text" id="admin-mgr-style" value="Quick Counter (90)" style="margin: 4px 0 8px 0;">
+                    <label style="font-size: 0.85rem;">Epic Booster Multiplier (Strictly +1 OVR):</label>
+                    <input type="number" id="admin-booster-val" value="1" readonly style="margin: 4px 0 8px 0; opacity: 0.7;">
+                    <button class="btn btn-green" onclick="adminSaveManagerConfig()">Save Manager & Boosters</button>
+                </div>
+
+                <div style="background: #060913; padding: 12px; border-radius: 8px; border: 1px solid #38bdf8;">
+                    <h3 style="color:#38bdf8;">🏟️ Stadium Editor Config</h3>
+                    <label style="font-size: 0.85rem;">Default Home Stadium Name:</label>
+                    <input type="text" id="admin-stadium-name" value="Apex Arena" style="margin: 4px 0 8px 0;">
+                    <button class="btn btn-green" onclick="adminSaveStadiumAdmin()">Save Stadium Default</button>
+                </div>
+
+                <div style="background: #060913; padding: 12px; border-radius: 8px; border: 1px solid #38bdf8;">
+                    <h3 style="color:#38bdf8;">🏆 Ranked Divisions Reward Manager</h3>
+                    <label style="font-size: 0.85rem;">Division 1 Promotion Coins:</label>
+                    <input type="number" id="admin-div1-coins" value="500" style="margin: 4px 0 10px 0;">
+                    <label style="font-size: 0.85rem;">Division 1 Promotion GP:</label>
+                    <input type="number" id="admin-div1-gp" value="50000" style="margin: 4px 0 10px 0;">
+                    <button class="btn btn-green" onclick="adminSaveDivisionRewards()">Save Division Rewards</button>
+                </div>
+
+                <div style="background: #060913; padding: 12px; border-radius: 8px; border: 1px solid #38bdf8;">
+                    <h3 style="color:#38bdf8;">🔗 Social Media Links Manager</h3>
+                    <input type="text" id="admin-yt-url" placeholder="https://youtube.com/@yourchannel" style="margin: 4px 0 10px 0;">
+                    <input type="text" id="admin-fb-url" placeholder="https://facebook.com/yourpage" style="margin: 4px 0 10px 0;">
+                    <button class="btn btn-green" onclick="adminSaveSocialLinks()">Save & Publish Social Links</button>
+                </div>
+
+                <div style="background: #060913; padding: 12px; border-radius: 8px; border: 1px solid #334155;">
+                    <h3>🎟️ Online Promo Code Publisher</h3>
+                    <div style="display: flex; gap: 8px; margin-bottom: 8px;">
+                        <input type="text" id="admin-new-code" placeholder="Code (e.g. CALVIN2027)" style="margin:0;">
+                        <select id="admin-code-type" style="margin:0; width: 160px;">
+                            <option value="coins">Reward Coins</option>
+                            <option value="epic">Guaranteed Epic Player</option>
+                        </select>
+                        <input type="number" id="admin-code-val" placeholder="Coins Amt" value="150" style="margin:0; width: 110px;">
+                    </div>
+                    <button class="btn btn-green" onclick="adminPublishPromoCode()">Publish Promo Code Live</button>
+                    <div id="admin-active-codes-list" style="margin-top: 10px; font-size: 0.85rem; background: #020617; padding: 8px; border-radius: 6px; max-height: 80px; overflow-y: auto;"></div>
+                </div>
+
+                <div style="background: #060913; padding: 12px; border-radius: 8px; border: 1px solid #334155;">
+                    <h3>👥 Registered Members Manager</h3>
+                    <div id="admin-member-list" style="max-height: 90px; overflow-y: auto; background: #020617; padding: 8px; border-radius: 6px; font-size: 0.85rem; margin-bottom: 8px;"></div>
+                    <div style="display: flex; gap: 8px;">
+                        <input type="text" id="admin-target-user" placeholder="Enter Manager Name to Block" style="margin:0;">
+                        <button class="btn" style="background:#f43f5e; width: 140px; margin:0;" onclick="adminBlockMember()">Block Member</button>
+                    </div>
+                </div>
+            </div>
+            <button class="btn" style="margin-top: 15px;" onclick="document.getElementById('splash-admin-modal').classList.add('hidden')">Close Admin Panel</button>
+        </div>
+    </div>
+
+    <!-- Rotate Warning -->
+    <div id="rotate-warning">
+        <h2>📱 Rotate Your Phone!</h2>
+        <p style="color: #94a3b8; max-width: 400px; margin-top: 10px;">Apex Football 2027 is built in full landscape mode for the ultimate eFootball console experience. Please turn your phone sideways!</p>
+    </div>
+
+    <!-- 3. REGISTRATION MODAL -->
+    <div id="reg-modal" class="modal-overlay hidden">
+        <div class="modal">
+            <h2>📝 Manager Registration & Data Link</h2>
+            <p style="color: #94a3b8; margin-bottom: 12px;">Link your email to generate your secure Konami-style Game ID so you never lose your account.</p>
+            <input type="text" id="reg-name" placeholder="Manager Name (e.g., Calvin)">
+            <input type="number" id="reg-age" placeholder="Age">
+            <input type="email" id="reg-email" placeholder="Email Address (Required for Data Link)">
+            <input type="text" id="reg-team" placeholder="Club Name (e.g., Apex FC)">
+            <button class="btn btn-green" onclick="completeRegistration()">Link Data & Start Training</button>
+        </div>
+    </div>
+
+    <!-- 4. TRAINING TUTORIAL -->
+    <div id="tutorial-modal" class="modal-overlay hidden">
+        <div class="modal" style="width: 580px;">
+            <h2>⚽ Basic Training & Controls Tutorial</h2>
+            <p style="color: #94a3b8; margin-bottom: 15px;" id="tutorial-step-text">Welcome to the pitch! Let's master the match controls. Lesson 1: Passing and Build-up play.</p>
+            <div style="background: #1e293b; padding: 20px; border-radius: 8px; margin-bottom: 15px; font-family: monospace; color: #38bdf8;" id="tutorial-control-box">
+                Tap Pass Button to distribute ball accurately across midfield.
+            </div>
+            <button class="btn btn-green" id="tutorial-next-btn" onclick="nextTutorialStep()">Complete Lesson (1 / 3)</button>
+        </div>
+    </div>
+
+    <!-- 5. PLAYER TRAINING MODAL -->
+    <div id="player-modal" class="modal-overlay hidden">
+        <div class="modal" style="width: 480px;">
+            <h2 id="modal-p-name" style="color: #38bdf8; margin-bottom: 5px;">Player Name</h2>
+            <p id="modal-p-pos" style="color: #eab308; font-weight: bold; margin-bottom: 15px;"></p>
+            <img id="modal-p-avatar" class="avatar-img" src="" alt="avatar">
+            <div style="text-align: left; background: #060913; padding: 15px; border-radius: 8px; margin: 15px 0; font-size: 0.9rem;">
+                <p><strong>Height / Age:</strong> <span id="modal-p-height">185 cm / 28</span></p>
+                <p><strong>Dominant Leg:</strong> <span id="modal-p-leg">Right Leg</span></p>
+                <p><strong>Player Level:</strong> <span id="modal-p-level">25 / 25 (Max Level)</span></p>
+                <p><strong>Playing Style:</strong> <span id="modal-p-style">Build Up</span></p>
+                <p id="modal-booster-info" style="color:#a855f7; font-weight:bold; margin-top:6px;">⚡ Booster Status: +1 OVR Active</p>
+                <p style="margin-top: 10px;"><strong>Acquired Special Skills:</strong></p>
+                <div id="modal-skills-list" style="color: #38bdf8; font-size: 0.85rem; margin-top: 4px;">None added yet</div>
+            </div>
+            <div style="display: flex; flex-direction: column; gap: 8px;">
+                <button class="btn btn-green" onclick="trainCurrentPlayer()">Feed EXP & Level Up (+1 OVR)</button>
+                <button class="btn" style="background: #a855f7; color:#fff;" onclick="openSkillTrainingModal()">✨ Add Additional Skill (eFootball Style)</button>
+                <button class="btn" onclick="document.getElementById('player-modal').classList.add('hidden')">Close</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 5.1 SKILL TRAINING PROGRAM MODAL -->
+    <div id="skill-train-modal" class="modal-overlay hidden">
+        <div class="modal" style="width: 420px;">
+            <h3 style="color: #a855f7; margin-bottom: 10px;">✨ Skill Training Program</h3>
+            <p style="color: #94a3b8; font-size: 0.9rem; margin-bottom: 15px;">Add a special player skill randomly, just like eFootball training programs!</p>
+            <select id="skill-select" style="margin-bottom: 15px;">
+                <option value="Double Touch">Double Touch</option>
+                <option value="One-touch Pass">One-touch Pass</option>
+                <option value="Pinpoint Crossing">Pinpoint Crossing</option>
+                <option value="Fighting Spirit">Fighting Spirit</option>
+                <option value="Interception">Interception</option>
+                <option value="Sole Control">Sole Control</option>
+            </select>
+            <button class="btn btn-green" onclick="confirmAddPlayerSkill()">Unlock & Equip Skill</button>
+            <button class="btn" style="margin-top: 8px;" onclick="document.getElementById('skill-train-modal').classList.add('hidden')">Cancel</button>
+        </div>
+    </div>
+
+    <!-- 6. GACHA REVEAL MODAL -->
+    <div id="gacha-reveal-modal" class="modal-overlay hidden">
+        <div class="modal" style="background: #0f172a; border: 3px solid #eab308;">
+            <h2 style="color: #eab308;" id="gacha-title-heading">🌟 SPECIAL PACK OPENING 🌟</h2>
+            <div class="gacha-card-box">
+                <img id="gacha-img" src="" style="width: 90px; height: 90px; border-radius: 50%; border: 3px solid #000; object-fit: cover;" alt="pulled player">
+                <h3 id="gacha-name" style="color: #000; margin-top: 10px; font-size: 1.3rem;">Player Name</h3>
+                <p id="gacha-pos" style="color: #111; font-weight: bold;"></p>
+                <div style="background: #000; color: #eab308; padding: 4px 12px; border-radius: 6px; margin-top: 10px; font-weight: bold;" id="gacha-rating">95 OVR</div>
+            </div>
+            <button class="btn btn-green" onclick="document.getElementById('gacha-reveal-modal').classList.add('hidden')">Awesome! Add to Squad</button>
+        </div>
+    </div>
+
+    <!-- HEADER -->
+    <header>
+        <div class="logo">
+            <div class="logo-badge">
+                <svg width="26" height="26" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M50 5 L90 25 L90 75 L50 95 L10 75 L10 25 Z" fill="#0284c7" stroke="#eab308" stroke-width="5"/>
+                    <path d="M50 15 L75 80 L62 80 L50 45 L38 80 L25 80 Z" fill="#ffffff"/>
+                    <polygon points="50,22 55,35 68,35 57,43 61,56 50,48 39,56 43,43 32,35 45,35" fill="#eab308"/>
+                </svg>
+            </div>
+            <span id="nav-brand-title" style="background: linear-gradient(90deg, #38bdf8, #eab308); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">Apex Football 2027</span>
+        </div>
+        <div class="user-info">
+            <div class="strength-badge">⚡ <span id="header-strength">2840</span></div>
+            <div class="coin-badge">🪙 <span id="coin-count">100</span></div>
+            <div class="gp-badge">🔵 <span id="gp-count">50000</span></div>
+            <div class="id-badge" id="header-id">ASNR-000</div>
+        </div>
+    </header>
+
+    <div class="container">
+        <nav>
+            <button class="nav-btn active" onclick="switchTab('hub')">🏠 My Hub & Manager</button>
+            <button class="nav-btn" onclick="switchTab('squad')">👥 Squad & Training Studio</button>
+            <button class="nav-btn" onclick="switchTab('gpmarket')">🔄 GP Transfer Market</button>
+            <button class="nav-btn" onclick="switchTab('gameplan')">📋 Tactical Game Plan</button>
+            <button class="nav-btn" onclick="switchTab('stadium')">🏟️ Stadium Customizer</button>
+            <button class="nav-btn" onclick="switchTab('ranked')">🏆 Ranked Divisions (Div 9-1)</button>
+            <button class="nav-btn" onclick="switchTab('online')">🌐 Online Friendly Room</button>
+            <button class="nav-btn" onclick="switchTab('socials')">📺 Community & Socials</button>
+            <button class="nav-btn" onclick="switchTab('promos')">🎟️ Online Promo Code</button>
+            <button class="nav-btn" onclick="switchTab('gacha')">✨ Contract & Spin Packs</button>
+            <button class="nav-btn" onclick="switchTab('dailymini')">⚽ Daily Penalty Game</button>
+            <button class="nav-btn" onclick="switchTab('modes')">🏆 Offline AI Match Hub</button>
+            <button class="nav-btn" onclick="switchTab('shop')">🛒 M-Pesa Coin Store</button>
+            <button class="nav-btn" onclick="switchTab('missions')">🎯 Missions & Objectives</button>
+        </nav>
+
+        <!-- Hub -->
+        <div id="hub" class="content active">
+            <div class="music-bar">
+                <div>🎶 <strong>Soundtrack:</strong> <span id="track-name">Champions Anthem (Orchestral)</span></div>
+                <div>
+                    <button class="btn" style="padding:4px 10px; margin:0;" onclick="toggleMusic()" id="music-toggle-btn">🔊 Pause Music</button>
+                    <button class="btn" style="padding:4px 10px; margin:0 0 0 5px;" onclick="nextTrack()">⏭️ Next Track</button>
+                </div>
+            </div>
+
+            <h2>Manager & Tactical Description</h2>
+            <div class="grid">
+                <div class="card" style="text-align: left;">
+                    <h3>Tactical Manager Profile</h3>
+                    <p><strong>Manager Name:</strong> <span id="hub-mgr-name">Jürgen Klopp</span></p>
+                    <p><strong>Primary Philosophy:</strong> <span id="hub-mgr-style">Quick Counter (High-intensity pressing)</span></p>
+                    <p style="color: #a855f7; margin-top: 6px;">⚡ Manager Booster: Grants +1 OVR boost to all matching squad members!</p>
+                </div>
+                <div class="card" style="text-align: left;">
+                    <h3>Linked Account Data Status</h3>
+                    <p><strong>Email:</strong> <span id="hub-email">Not Linked</span></p>
+                    <p><strong>Game ID:</strong> <span id="hub-gameid" style="color:#38bdf8; font-family:monospace;">ASNR-000-000</span></p>
+                    <p style="color: #22c55e; margin-top: 8px;">✅ Data Link Active (Cloud Protected)</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Squad -->
+        <div id="squad" class="content">
+            <h2>My Squad & Training Studio (Click any player card to level up stats)</h2>
+            <div class="grid" id="squad-list"></div>
+        </div>
+
+        <!-- GP Transfer Market -->
+        <div id="gpmarket" class="content">
+            <h2>🔄 GP Standard Player Market & Scout</h2>
+            <div class="grid" id="gp-market-list"></div>
+        </div>
+
+        <!-- Tactical Game Plan Editor -->
+        <div id="gameplan" class="content">
+            <h2>📋 Tactical Game Plan & Collective Strength</h2>
+            <div class="grid">
+                <div class="card" style="text-align: left; border-color: #a855f7;">
+                    <h3 style="color: #a855f7;">⚡ Team Collective Strength</h3>
+                    <p style="font-size: 2rem; font-weight: 900; color: #fff; margin: 10px 0;" id="gameplan-strength-val">2840</p>
+                    <p style="font-size: 0.85rem; color: #94a3b8;">Calculated from starting player ratings + Manager Booster & Playstyle Proficiency.</p>
+                </div>
+                <div class="card" style="text-align: left;">
+                    <h3>Select Formation</h3>
+                    <select id="formation-select" onchange="updateFormation()" style="margin: 10px 0;">
+                        <option value="4-3-3">4-3-3 (Balanced Attacking)</option>
+                        <option value="4-4-2">4-4-2 (Classic Solid Block)</option>
+                        <option value="3-5-2">3-5-2 (Dominant Midfield)</option>
+                    </select>
+                </div>
+            </div>
+        </div>
+
+        <!-- Stadium Customizer Tab -->
+        <div id="stadium" class="content">
+            <h2>🏟️ Custom Stadium Editor</h2>
+            <p style="color: #94a3b8; margin-bottom: 15px;">Customize your home stadium name, turf pattern, and lighting to give your club a unique identity!</p>
+            <div class="card" style="max-width: 500px; margin: 0 auto; text-align: left; padding: 25px;">
+                <label style="font-size: 0.85rem; color: #38bdf8;">Stadium Name:</label>
+                <input type="text" id="stadium-name-input" placeholder="e.g. Emori Arena" style="margin: 6px 0 12px 0;">
+                
+                <label style="font-size: 0.85rem; color: #38bdf8;">Pitch Turf Design:</label>
+                <select id="stadium-turf-select" style="margin: 6px 0 12px 0;">
+                    <option value="Classic Emerald">Classic Emerald Stripe</option>
+                    <option value="Diamond Cut">Diamond Cut Turf</option>
+                    <option value="Night Floodlit">Ultra HD Night Floodlit</option>
+                </select>
+
+                <button class="btn btn-green" onclick="saveStadiumConfig()">Save Stadium Settings</button>
+            </div>
+        </div>
+
+        <!-- Ranked Divisions -->
+        <div id="ranked" class="content">
+            <h2>🏆 Online Ranked Divisions (Division 9 to Division 1)</h2>
+            <div class="card" style="max-width: 600px; margin: 0 auto; text-align: left; padding: 25px; border: 2px solid #38bdf8;">
+                <h3 style="color: #eab308; font-size: 1.3rem; margin-bottom: 10px;" id="current-division-title">Current Status: Division 9</h3>
+                <p style="margin-bottom: 8px;"><strong>Phase Progress:</strong> <span id="div-matches-text">0 / 3 Wins for Promotion</span></p>
+                <button class="btn btn-green" onclick="showPreMatchLineup('Ranked Division')">Play Ranked Division Match</button>
+            </div>
+        </div>
+
+        <!-- Online Friendly Room -->
+        <div id="online" class="content">
+            <h2>🌐 Online Friendly Room (Room Code Matchmaking)</h2>
+            <div class="grid">
+                <div class="card">
+                    <h3>Create Friendly Room</h3>
+                    <button class="btn btn-green" onclick="createRoom()">Create Room Code</button>
+                    <p id="room-code-display" style="margin-top: 12px; font-weight: bold; color: #38bdf8; font-size: 1.1rem;"></p>
+                </div>
+                <div class="card">
+                    <h3>Join Friendly Room</h3>
+                    <input type="text" id="join-code-input" placeholder="e.g. ROOM-4821" style="margin: 8px 0;">
+                    <button class="btn" onclick="joinRoom()">Join Match & Play</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Community & Socials -->
+        <div id="socials" class="content">
+            <h2>📺 Calvin Studios Community & Social Channels</h2>
+            <div class="grid">
+                <div class="card epic" style="text-align: center; padding: 25px;">
+                    <h3 style="color: #ef4444; font-size: 1.3rem; margin-bottom: 10px;">▶️ YouTube Channel</h3>
+                    <a id="social-yt-link" href="#" target="_blank" class="btn" style="background: #ef4444; color: #fff; text-decoration: none; display: block; margin-bottom: 10px;" onclick="openSocialLink('yt')">Visit YouTube (Coming Soon)</a>
+                    <button class="btn btn-green" id="claim-yt-btn" onclick="claimSocialReward('yt')">Follow & Claim +50 Coins 🪙</button>
+                </div>
+                <div class="card epic" style="text-align: center; padding: 25px; border-color: #38bdf8;">
+                    <h3 style="color: #38bdf8; font-size: 1.3rem; margin-bottom: 10px;">📘 Facebook Page</h3>
+                    <a id="social-fb-link" href="#" target="_blank" class="btn" style="background: #38bdf8; color: #000; text-decoration: none; display: block; margin-bottom: 10px;" onclick="openSocialLink('fb')">Visit Facebook (Coming Soon)</a>
+                    <button class="btn btn-green" id="claim-fb-btn" onclick="claimSocialReward('fb')">Follow & Claim +50 Coins 🪙</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Promo Code -->
+        <div id="promos" class="content">
+            <h2>🎟️ Online Promo Code Redemption</h2>
+            <div class="card" style="max-width: 500px; margin: 0 auto; padding: 25px; text-align: left;">
+                <label style="font-size: 0.85rem; color: #38bdf8;">Enter Secret Promo Code:</label>
+                <input type="text" id="promo-code-input" placeholder="e.g. CALVIN2027" style="margin: 8px 0 15px 0;">
+                <button class="btn btn-green" onclick="redeemPromoCode()">Redeem Code Now</button>
+                <p id="promo-feedback" style="margin-top: 12px; font-weight: bold;"></p>
+            </div>
+        </div>
+
+        <!-- Contract & Spin Packs -->
+        <div id="gacha" class="content">
+            <h2>✨ Contract & Spin Packs (Authentic eFootball Odds)</h2>
+            <div class="grid">
+                <div class="card epic">
+                    <h3 style="color: #eab308;">🏴󠁧󠁢󠁥󠁮󠁧󠁿 Premier League Contract</h3>
+                    <button class="btn btn-green" onclick="spinContractPack('EPL')">Spin Pack (100 Coins)</button>
+                </div>
+                <div class="card epic" style="border: 2px solid #38bdf8;">
+                    <h3 style="color: #38bdf8;">⭐ UEFA Champions League</h3>
+                    <button class="btn btn-green" style="background:#38bdf8; color:#000;" onclick="spinContractPack('UCL')">Spin Pack (100 Coins)</button>
+                </div>
+                <div class="card epic" style="border: 2px solid #a855f7;">
+                    <h3 style="color: #c084fc;">🌟 Italian League & Legends</h3>
+                    <button class="btn btn-green" style="background:#a855f7; color:#fff;" onclick="spinContractPack('IT')">Spin Pack (100 Coins)</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Daily Penalty Game -->
+        <div id="dailymini" class="content">
+            <h2>⚽ Daily Penalty Shootout Minigame</h2>
+            <div class="card" style="max-width: 500px; margin: 0 auto; padding: 25px;">
+                <h3 style="color: #eab308; margin-bottom: 15px;">Choose Your Shot Target</h3>
+                <div style="display: flex; gap: 10px; justify-content: center; margin-bottom: 20px;">
+                    <button class="btn" style="width: 120px;" onclick="shootPenalty('Left')">⬅️ Left</button>
+                    <button class="btn btn-green" style="width: 120px;" onclick="shootPenalty('Center')">⬆️ Center</button>
+                    <button class="btn" style="width: 120px;" onclick="shootPenalty('Right')">➡️ Right</button>
+                </div>
+                <p id="penalty-result-text" style="font-weight: bold; color: #38bdf8; font-size: 1.1rem;"></p>
+            </div>
+        </div>
+
+        <!-- Offline AI Match Hub -->
+        <div id="modes" class="content">
+            <h2>🏆 Offline AI Squad Match Hub</h2>
+            <div class="grid">
+                <div class="card">
+                    <h3>🎮 Offline AI Exhibition Match</h3>
+                    <label style="font-size:0.8rem; color:#eab308;">Select AI Difficulty:</label>
+                    <select id="ai-difficulty-select" style="margin: 4px 0 10px 0;">
+                        <option value="Beginner">Beginner</option>
+                        <option value="Regular">Regular</option>
+                        <option value="Professional">Professional</option>
+                        <option value="Top Player">Top Player</option>
+                        <option value="Legend">Legend</option>
+                    </select>
+                    <button class="btn btn-green" onclick="showPreMatchLineup('Offline AI')">Play Offline Match</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- M-Pesa Shop -->
+        <div id="shop" class="content">
+            <h2>🛒 M-Pesa In-Game Shop</h2>
+            <div class="grid">
+                <div class="card epic" style="border: 2px solid #eab308;">
+                    <h3>🌟 Lamine Yamal Special Pack</h3>
+                    <p style="font-size: 1.1rem; font-weight: bold; color: #22c55e; margin: 8px 0;">Price: 400 KES</p>
+                    <button class="btn btn-mpesa" onclick="buyPlayerOffer('Lamine Yamal', 400, 98, 'RWF', 100)">Buy via M-Pesa (400 KES)</button>
+                </div>
+                <div class="card epic" style="border: 2px solid #22c55e;">
+                    <h3>🌟 100 Coins Pack</h3>
+                    <p style="font-size: 1.1rem; font-weight: bold; color: #22c55e; margin: 8px 0;">Price: 140 KES</p>
+                    <button class="btn btn-mpesa" onclick="buyMpesaOffer('100 Coins', 140, 100)">Buy via M-Pesa</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Missions -->
+        <div id="missions" class="content">
+            <h2>🎯 Objectives & Line-Up Rewards</h2>
+            <div id="mission-list"></div>
+        </div>
+    </div>
+
+    <!-- 7. PRE-MATCH LINEUP SCREEN -->
+    <div id="lineup-screen">
+        <div class="lineup-card">
+            <h2 style="color: #38bdf8; margin-bottom: 10px;">📋 Pre-Match Team Sheet & Tactics</h2>
+            <p><strong>Manager:</strong> <span id="lineup-mgr-text">Jürgen Klopp</span> (<span id="lineup-mgr-style">Quick Counter - 90</span>)</p>
+            <p><strong>Stadium:</strong> <span id="lineup-stadium-text" style="color: #38bdf8;">Apex Stadium</span></p>
+            <p><strong>Team Collective Strength:</strong> <span id="lineup-strength-text" style="color: #a855f7; font-weight: bold;">2840</span></p>
+            <button class="btn btn-green" onclick="startActualMatch()">Proceed to Kickoff (Commentary Live)</button>
+        </div>
+    </div>
+
+    <!-- 8. LANDSCAPE MATCH ARENA -->
+    <div id="match-overlay">
+        <div class="scoreboard">
+            <span id="home-team-name">User FC</span>
+            <span style="color:#eab308;" id="hud-score">0 - 0</span>
+            <span id="away-team-name">AI United</span>
+            <div class="match-clock" id="hud-clock">00:00</div>
+        </div>
+
+        <div class="pitch-view" id="pitch-container">
+            <div class="pitch-half-line"></div>
+            <div class="pitch-center-circle"></div>
+
+            <div class="emoji-bar">
+                <button class="emoji-btn" onclick="triggerMatchEmoji('😂')">😂</button>
+                <button class="emoji-btn" onclick="triggerMatchEmoji('😭')">😭</button>
+                <button class="emoji-btn" onclick="triggerMatchEmoji('🤪')">🤪</button>
+                <button class="emoji-btn" onclick="triggerMatchEmoji('🥶')">🥶</button>
+                <button class="emoji-btn" onclick="triggerMatchEmoji('👏')">👏</button>
+                <button class="emoji-btn" onclick="triggerMatchEmoji('👎')">👎</button>
+                <button class="emoji-btn" onclick="triggerMatchEmoji('🫵')">🫵</button>
+            </div>
+            
+            <p style="color:#fff; font-weight:bold; font-size:1.2rem; text-shadow:0 2px 4px #000; z-index:10;" id="pitch-status">Pre-Match Studio...</p>
+            <div class="drama-badge" id="drama-badge">⚠️ PLAYER SCUFFLE ON PITCH!</div>
+
+            <div class="controls-overlay">
+                <div class="dpad-container">🕹️ JOYSTICK</div>
+                <div class="action-btns">
+                    <button class="control-btn" onclick="executeControlAction('Match Up')">🛡️ Match Up</button>
+                    <button class="control-btn" onclick="executeControlAction('Through Pass')">📐 Through</button>
+                    <button class="control-btn" onclick="executeControlAction('Stunning Shot')">⚡ Stunning</button>
+                    <button class="control-btn" onclick="executeControlAction('Pass')">👟 Pass</button>
+                    <button class="control-btn" onclick="executeControlAction('Sprint')">🏃 Sprint</button>
+                    <button class="control-btn" onclick="executeControlAction('Shoot')">⚽ Shoot</button>
+                </div>
+            </div>
+
+            <div id="var-overlay">
+                <div class="var-box">
+                    <h3 style="color:#eab308; font-size:1.3rem; margin-bottom:8px;">📺 VAR CHECK IN PROGRESS</h3>
+                </div>
+            </div>
+
+            <div id="halftime-overlay">
+                <div class="var-box" style="width: 500px;">
+                    <h3 style="color:#38bdf8; font-size:1.4rem; margin-bottom:10px;">📊 HALF-TIME ANALYSIS & STATS</h3>
+                    <button class="btn btn-green" style="margin-top: 15px;" onclick="resumeSecondHalf()">Start Second Half</button>
+                </div>
+            </div>
+
+            <div id="motm-overlay">
+                <div class="var-box" style="width: 520px;">
+                    <h3 style="color:#eab308; font-size:1.4rem; margin-bottom:10px;">🎤 MAN OF THE MATCH INTERVIEW</h3>
+                    <button class="btn btn-green" onclick="closeMatchAndCollectRewards()">Collect Rewards & Return to Hub</button>
+                </div>
+            </div>
+        </div>
+
+        <div class="commentary-box" id="arena-commentary">
+            [Broadcasting live with Peter Drury, Jon Champion & Peter Mukangai...]
+        </div>
+    </div>
+
+    <script>
+        let gameData = JSON.parse(localStorage.getItem('apexFootball2027V25')) || {
+            registered: false,
+            tutorialCompleted: false,
+            gameId: "",
+            name: "",
+            age: "",
+            email: "",
+            teamName: "",
+            studioName: "CALVIN STUDIOS",
+            youtubeUrl: "COMING SOON",
+            facebookUrl: "COMING SOON",
+            managerName: "Jürgen Klopp",
+            managerStyle: "Quick Counter (90)",
+            stadiumName: "Apex Arena",
+            stadiumTurf: "Classic Emerald",
+            coins: 50,
+            gp: 35000,
+            winReward: 50,
+            currentDivision: 9,
+            divWins: 0,
+            div1RewardCoins: 500,
+            div1RewardGp: 50000,
+            strengthFactor: 2.85,
+            players: [],
+            blockedUsers: [],
+            redeemedCodes: [],
+            claimedSocials: { yt: false, fb: false },
+            promoCodes: {
+                "CALVIN2027": { type: "coins", val: 150 },
+                "EPICGIFT": { type: "epic", val: "Zinedine Zidane" }
+            },
+            friendlyMatchesPlayed: 0,
+            rewardsClaimed: false
+        };
+
+        let tutorialStep = 1;
+        let selectedPlayerIndex = null;
+        let currentMatchType = 'AI Exhibition';
+
+        const gpMarketPool = [
+            { name: "Declan Rice", pos: "DMF", rating: 85, price: 25000, avatar: "https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=150", style: "Anchor Man", booster: false, skills: [] },
+            { name: "Bruno Fernandes", pos: "AMF", rating: 86, price: 28000, avatar: "https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?w=150", style: "Creative Playmaker", booster: false, skills: [] },
+            { name: "Marquinhos", pos: "CB", rating: 84, price: 20000, avatar: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=150", style: "Build Up", booster: false, skills: [] }
+        ];
+
+        const starterNames = [
+            { name: "Virgil van Dijk", pos: "CB", rating: 88, booster: true, epic: true, avatar: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=150", height: "193 cm", style: "Build Up", level: "25/25", skills: ["Interception", "Fighting Spirit"] },
+            { name: "A. Onana", pos: "GK", rating: 70, booster: false, avatar: "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=150", height: "190 cm", style: "Offensive GK", level: "25/25", skills: [] },
+            { name: "T. Alexander-Arnold", pos: "RB", rating: 70, booster: false, avatar: "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=150", height: "180 cm", style: "Full-back", level: "25/25", skills: ["Pinpoint Crossing"] },
+            { name: "W. Saliba", pos: "CB", rating: 70, booster: false, avatar: "https://images.unsplash.com/photo-1519085360753-af0119f7cbe7?w=150", height: "192 cm", style: "Build Up", level: "25/25", skills: [] },
+            { name: "A. Robertson", pos: "LB", rating: 70, booster: false, avatar: "https://images.unsplash.com/photo-1508214751196-bcfd4ca60f91?w=150", height: "178 cm", style: "Full-back", level: "25/25", skills: [] },
+            { name: "Rodri", pos: "DMF", rating: 70, booster: false, avatar: "https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=150", height: "191 cm", style: "Anchor Man", level: "25/25", skills: ["One-touch Pass"] },
+            { name: "K. De Bruyne", pos: "AMF", rating: 70, booster: false, avatar: "https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?w=150", height: "181 cm", style: "Playmaker", level: "25/25", skills: ["One-touch Pass"] },
+            { name: "J. Bellingham", pos: "CMF", rating: 70, booster: false, avatar: "https://images.unsplash.com/photo-1522075469751-3a6694fb2f61?w=150", height: "186 cm", style: "Box-to-Box", level: "25/25", skills: ["Double Touch"] },
+            { name: "Vinícius Jr", pos: "LWF", rating: 70, booster: false, avatar: "https://images.unsplash.com/photo-1539571696357-5a69c17a67c6?w=150", height: "176 cm", style: "Roaming Flank", level: "25/25", skills: ["Double Touch"] },
+            { name: "B. Saka", pos: "RWF", rating: 70, booster: false, avatar: "https://images.unsplash.com/photo-1524504388940-b1c1722653e1?w=150", height: "178 cm", style: "Winger", level: "25/25", skills: ["Pinpoint Crossing"] },
+            { name: "E. Haaland", pos: "CF", rating: 70, booster: false, avatar: "https://images.unsplash.com/photo-1501196354995-cbb51c65aaea?w=150", height: "195 cm", style: "Goal Poacher", level: "25/25", skills: ["Fighting Spirit"] }
+        ];
+
+        let matchTimer = null, matchMinute = 0, homeScore = 0, awayScore = 0;
+        let audioCtx = null, musicPlaying = false, musicInterval = null;
+        
+        const tracks = [
+            { name: "Champions Anthem (Orchestral)", melody: [261.63, 329.63, 392.00, 523.25] },
+            { name: "Street Skillz Beats (Electronic Groove)", melody: [220.00, 246.94, 293.66, 329.63] },
+            { name: "Mchezaji Bora (Swahili Vibe)", melody: [329.63, 392.00, 440.00, 523.25] }
+        ];
+        let currentTrackIdx = 0;
+
+        window.onload = function() {
+            document.getElementById('splash-studio-text').innerText = `${gameData.studioName || 'CALVIN STUDIOS'} • UNREAL ENGINE`;
+            document.getElementById('admin-yt-url').value = gameData.youtubeUrl !== 'COMING SOON' ? gameData.youtubeUrl : '';
+            document.getElementById('admin-fb-url').value = gameData.facebookUrl !== 'COMING SOON' ? gameData.facebookUrl : '';
+            document.getElementById('admin-mgr-name').value = gameData.managerName || "Jürgen Klopp";
+            document.getElementById('admin-mgr-style').value = gameData.managerStyle || "Quick Counter (90)";
+            document.getElementById('admin-stadium-name').value = gameData.stadiumName || "Apex Arena";
+            document.getElementById('stadium-name-input').value = gameData.stadiumName || "Apex Arena";
+            updateSocialUI();
+            renderGpMarket();
+            renderRankedUI();
+            calculateCollectiveStrength();
+            document.body.addEventListener('click', startBackgroundMusic, { once: true });
+        };
+
+        function calculateCollectiveStrength() {
+            if(!gameData.players || gameData.players.length === 0) return 2400;
+            let totalOvr = 0;
+            let squadCount = Math.min(11, gameData.players.length);
+            for(let i = 0; i < squadCount; i++) {
+                let p = gameData.players[i];
+                let effectiveRating = p.rating + (p.booster ? 1 : 0); // Strict +1 Booster addition
+                totalOvr += effectiveRating;
+            }
+            let factor = gameData.strengthFactor || 2.85;
+            let strength = Math.floor(totalOvr * factor + 380); // Manager proficiency bonus
+            document.getElementById('header-strength').innerText = strength;
+            document.getElementById('gameplan-strength-val').innerText = strength;
+            document.getElementById('lineup-strength-text').innerText = strength;
+            return strength;
+        }
+
+        function saveStadiumConfig() {
+            let name = document.getElementById('stadium-name-input').value.trim();
+            let turf = document.getElementById('stadium-turf-select').value;
+            if(name) {
+                gameData.stadiumName = name;
+                gameData.stadiumTurf = turf;
+                saveState();
+                alert(`🏟️ Stadium successfully configured as "${name}" with ${turf} turf!`);
+            }
+        }
+
+        function adminSaveStadiumAdmin() {
+            let name = document.getElementById('admin-stadium-name').value.trim();
+            if(name) {
+                gameData.stadiumName = name;
+                saveState();
+                document.getElementById('stadium-name-input').value = name;
+                alert(`🏟️ Default stadium name updated to "${name}" successfully!`);
+            }
+        }
+
+        function adminSaveManagerConfig() {
+            let mName = document.getElementById('admin-mgr-name').value.trim();
+            let mStyle = document.getElementById('admin-mgr-style').value.trim();
+            if(mName && mStyle) {
+                gameData.managerName = mName;
+                gameData.managerStyle = mStyle;
+                saveState();
+                document.getElementById('hub-mgr-name').innerText = mName;
+                document.getElementById('hub-mgr-style').innerText = mStyle;
+                document.getElementById('lineup-mgr-text').innerText = mName;
+                document.getElementById('lineup-mgr-style').innerText = mStyle;
+                alert("👔 Manager profile and boosts updated successfully!");
+                }
+        }
+
+        function renderRankedUI() {
+            document.getElementById('current-division-title').innerText = `Current Status: Division ${gameData.currentDivision}`;
+            document.getElementById('div-matches-text').innerText = `${gameData.divWins} / 3 Wins for Promotion`;
+        }
+
+        function triggerMatchEmoji(emoji) {
+            let container = document.getElementById('pitch-container');
+            let elem = document.createElement('div');
+            elem.className = 'floating-emoji';
+            elem.innerText = emoji;
+            elem.style.left = (30 + Math.random() * 40) + '%';
+            elem.style.top = '50%';
+            container.appendChild(elem);
+            setTimeout(() => elem.remove(), 1800);
+        }
+
+        function executeControlAction(action) {
+            addCommentaryLine("In-Game Command", `Manager executed ${action}!`);
+        }
+
+        function renderGpMarket() {
+            let list = document.getElementById('gp-market-list');
+            list.innerHTML = '';
+            gpMarketPool.forEach((p, idx) => {
+                list.innerHTML += `
+                    <div class="card">
+                        <div class="rating-badge">${p.rating} OVR</div>
+                        <img src="${p.avatar}" class="avatar-img" alt="${p.name}">
+                        <h3>${p.name}</h3>
+                        <p>Position: <strong>${p.pos}</strong></p>
+                        <p style="color:#3b82f6; font-weight:bold; margin:6px 0;">Cost: ${p.price.toLocaleString()} GP</p>
+                        <button class="btn btn-green" onclick="buyGpPlayer(${idx})">Sign Player</button>
+                    </div>
+                `;
+            });
+        }
+
+        function buyGpPlayer(idx) {
+            let item = gpMarketPool[idx];
+            if(gameData.gp < item.price) { alert("❌ Not enough GP!"); return; }
+            gameData.gp -= item.price;
+            gameData.players.unshift({ name: item.name, pos: item.pos, rating: item.rating, booster: false, epic: false, avatar: item.avatar, skills: [] });
+            saveState(); initApp();
+            alert(`🎉 Signed ${item.name} (${item.rating} OVR)!`);
+        }
+
+        function updateSocialUI() {
+            let ytLink = document.getElementById('social-yt-link');
+            let fbLink = document.getElementById('social-fb-link');
+            let ytBtn = document.getElementById('claim-yt-btn');
+            let fbBtn = document.getElementById('claim-fb-btn');
+
+            if(gameData.youtubeUrl !== 'COMING SOON') ytLink.href = gameData.youtubeUrl;
+            if(gameData.facebookUrl !== 'COMING SOON') fbLink.href = gameData.facebookUrl;
+            if(gameData.claimedSocials?.yt) { ytBtn.innerText = "Claimed ✅"; ytBtn.style.opacity = "0.5"; }
+            if(gameData.claimedSocials?.fb) { fbBtn.innerText = "Claimed ✅"; fbBtn.style.opacity = "0.5"; }
+        }
+
+        function claimSocialReward(platform) {
+            if(gameData.claimedSocials[platform]) return;
+            gameData.claimedSocials[platform] = true;
+            gameData.coins += 50;
+            saveState(); initApp(); updateSocialUI();
+            alert("🎉 +50 Coins added!");
+        }
+
+        function startBackgroundMusic() {
+            if(musicPlaying) return;
+            try {
+                audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+                musicPlaying = true;
+                playLoopingTrack();
+            } catch(e) {}
+        }
+
+        function playLoopingTrack() {
+            if(!musicPlaying || !audioCtx) return;
+            let track = tracks[currentTrackIdx];
+            document.getElementById('track-name').innerText = track.name;
+            let noteIdx = 0;
+            musicInterval = setInterval(() => {
+                if(!musicPlaying) return;
+                let osc = audioCtx.createOscillator();
+                let gain = audioCtx.createGain();
+                osc.type = 'sine';
+                osc.frequency.setValueAtTime(track.melody[noteIdx % track.melody.length], audioCtx.currentTime);
+                gain.gain.setValueAtTime(0.04, audioCtx.currentTime);
+                gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 1.2);
+                osc.connect(gain); gain.connect(audioCtx.destination);
+                osc.start(); osc.stop(audioCtx.currentTime + 1.2);
+                noteIdx++;
+            }, 1200);
+        }
+
+        function toggleMusic() {
+            let btn = document.getElementById('music-toggle-btn');
+            if(musicPlaying) { musicPlaying = false; clearInterval(musicInterval); btn.innerText = "🔇 Play Music"; }
+            else { musicPlaying = true; if(!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)(); playLoopingTrack(); btn.innerText = "🔊 Pause Music"; }
+        }
+
+        function nextTrack() {
+            currentTrackIdx = (currentTrackIdx + 1) % tracks.length;
+            clearInterval(musicInterval);
+            if(musicPlaying) playLoopingTrack();
+        }
+
+        function adminSaveSocialLinks() {
+            gameData.youtubeUrl = document.getElementById('admin-yt-url').value.trim() || "COMING SOON";
+            gameData.facebookUrl = document.getElementById('admin-fb-url').value.trim() || "COMING SOON";
+            saveState(); updateSocialUI();
+            alert("🔗 Links updated!");
+        }
+
+        function openSplashAdmin() {
+            let pin = prompt("🔒 Enter Master Admin Passcode:");
+            if(pin === "@emoli$the1") {
+                document.getElementById('splash-admin-modal').classList.remove('hidden');
+            } else {
+                alert("❌ Incorrect Passcode.");
+            }
+        }
+
+        function enterGameFromSplash() {
+            let splash = document.getElementById('splash-screen');
+            splash.style.opacity = '0';
+            setTimeout(() => splash.remove(), 800);
+            if (!gameData.registered) document.getElementById('reg-modal').classList.remove('hidden');
+            else if (!gameData.tutorialCompleted) document.getElementById('tutorial-modal').classList.remove('hidden');
+            else initApp();
+        }
+
+        function completeRegistration() {
+            let name = document.getElementById('reg-name').value;
+            let email = document.getElementById('reg-email').value;
+            let team = document.getElementById('reg-team').value;
+            if(!name || !email || !team) { alert("Fill all details!"); return; }
+            
+            gameData.gameId = `ASNR-${Math.floor(100+Math.random()*900)}`;
+            gameData.name = name; gameData.email = email; gameData.teamName = team; gameData.registered = true;
+            saveState();
+            document.getElementById('reg-modal').classList.add('hidden');
+            document.getElementById('tutorial-modal').classList.remove('hidden');
+        }
+
+        function nextTutorialStep() {
+            tutorialStep++;
+            if(tutorialStep <= 3) {
+                document.getElementById('tutorial-step-text').innerText = `Lesson ${tutorialStep}: Master match controls.`;
+                document.getElementById('tutorial-next-btn').innerText = `Complete Lesson (${tutorialStep} / 3)`;
+            } else {
+                gameData.tutorialCompleted = true;
+                gameData.players = starterNames;
+                gameData.coins += 50;
+                saveState();
+                document.getElementById('tutorial-modal').classList.add('hidden');
+                initApp();
+            }
+        }
+
+        function initApp() {
+            document.getElementById('header-id').innerText = gameData.gameId;
+            document.getElementById('coin-count').innerText = gameData.coins;
+            document.getElementById('gp-count').innerText = gameData.gp;
+            document.getElementById('hub-email').innerText = gameData.email;
+            document.getElementById('hub-gameid').innerText = gameData.gameId;
+            document.getElementById('hub-mgr-name').innerText = gameData.managerName;
+            document.getElementById('hub-mgr-style').innerText = gameData.managerStyle;
+            document.getElementById('lineup-mgr-text').innerText = gameData.managerName;
+            document.getElementById('lineup-mgr-style').innerText = gameData.managerStyle;
+            document.getElementById('lineup-stadium-text').innerText = gameData.stadiumName;
+            renderSquad(); renderMissions(); renderRankedUI(); calculateCollectiveStrength();
+        }
+
+        function saveState() {
+            localStorage.setItem('apexFootball2027V25', JSON.stringify(gameData));
+        }
+
+        function switchTab(tabId) {
+            document.querySelectorAll('.content').forEach(el => el.classList.remove('active'));
+            document.querySelectorAll('.nav-btn').forEach(el => el.classList.remove('active'));
+            document.getElementById(tabId).classList.add('active');
+            let btn = Array.from(document.querySelectorAll('.nav-btn')).find(b => b.getAttribute('onclick')?.includes(tabId));
+            if(btn) btn.classList.add('active');
+            if(tabId === 'missions') renderMissions();
+            if(tabId === 'squad') renderSquad();
+            if(tabId === 'gpmarket') renderGpMarket();
+            if(tabId === 'ranked') renderRankedUI();
+            if(tabId === 'gameplan') calculateCollectiveStrength();
+        }
+
+        function renderSquad() {
+            let list = document.getElementById('squad-list');
+            list.innerHTML = '';
+            gameData.players.forEach((p, idx) => {
+                let displayRating = p.rating + (p.booster ? 1 : 0);
+                list.innerHTML += `
+                    <div class="card ${p.epic ? 'epic' : ''}" onclick="openPlayerModal(${idx})">
+                        <div class="rating-badge">${displayRating} OVR</div>
+                        <img src="${p.avatar}" class="avatar-img" alt="${p.name}">
+                        <h3>${p.name}</h3>
+                        <p>Position: <strong>${p.pos}</strong></p>
+                        ${p.booster ? '<span class="boost-tag">⚡ Boosted (+1 OVR)</span>' : ''}
+                    </div>
+                `;
+            });
+        }
+
+        function openPlayerModal(idx) {
+            selectedPlayerIndex = idx;
+            let p = gameData.players[idx];
+            let effRating = p.rating + (p.booster ? 1 : 0);
+            document.getElementById('modal-p-name').innerText = p.name;
+            document.getElementById('modal-p-pos').innerText = `Position: ${p.pos} | Rating: ${effRating} OVR`;
+            document.getElementById('modal-p-avatar').src = p.avatar;
+            document.getElementById('modal-booster-info').style.display = p.booster ? 'block' : 'none';
+            
+            let skillsContainer = document.getElementById('modal-skills-list');
+            if(p.skills && p.skills.length > 0) {
+                skillsContainer.innerHTML = p.skills.map(s => `<span style="background:#1e293b; padding:2px 6px; border-radius:4px; margin-right:4px; display:inline-block; margin-top:2px;">⚽ ${s}</span>`).join(' ');
+            } else {
+                skillsContainer.innerHTML = "None added yet";
+            }
+
+            document.getElementById('player-modal').classList.remove('hidden');
+        }
+
+        function trainCurrentPlayer() {
+            if(selectedPlayerIndex !== null) {
+                gameData.players[selectedPlayerIndex].rating += 1;
+                saveState(); renderSquad(); openPlayerModal(selectedPlayerIndex); calculateCollectiveStrength();
+                alert(`🎉 Player Trained! +1 OVR!`);
+            }
+        }
+
+        function openSkillTrainingModal() {
+            document.getElementById('skill-train-modal').classList.remove('hidden');
+        }
+
+        function confirmAddPlayerSkill() {
+            if(selectedPlayerIndex !== null) {
+                let newSkill = document.getElementById('skill-select').value;
+                let player = gameData.players[selectedPlayerIndex];
+                if(!player.skills) player.skills = [];
+                if(player.skills.includes(newSkill)) {
+                    alert("This player already has this skill!");
+                    return;
+                }
+                player.skills.push(newSkill);
+                saveState();
+                document.getElementById('skill-train-modal').classList.add('hidden');
+                openPlayerModal(selectedPlayerIndex);
+                alert(`✨ Successfully unlocked and added new skill: "${newSkill}" to ${player.name}!`);
+            }
+        }
+
+        function spinContractPack(packType) {
+            if(gameData.coins < 100) { alert("Not enough coins!"); return; }
+            gameData.coins -= 100; saveState(); initApp();
+            let pulled = { name: "Thierry Henry (Epic)", pos: "CF", rating: 101, booster: true, epic: true, avatar: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=150", skills: ["Double Touch", "One-touch Pass"] };
+            gameData.players.unshift(pulled); saveState(); initApp();
+            document.getElementById('gacha-img').src = pulled.avatar;
+            document.getElementById('gacha-name').innerText = pulled.name;
+            document.getElementById('gacha-pos').innerText = `${pulled.pos} (Boosted ⚡)`;
+            document.getElementById('gacha-rating').innerText = `102 OVR`;
+            document.getElementById('gacha-reveal-modal').classList.remove('hidden');
+        }
+
+        function shootPenalty(target) {
+            let success = Math.random() > 0.4;
+            let resText = document.getElementById('penalty-result-text');
+            if(success) {
+                gameData.coins += 10; gameData.gp += 500; saveState(); initApp();
+                resText.style.color = "#22c55e"; resText.innerText = `⚽ GOAL! +10 Coins & +500 GP!`;
+            } else {
+                resText.style.color = "#ef4444"; resText.innerText = `❌ SAVED!`;
+            }
+        }
+
+        function renderMissions() {
+            document.getElementById('mission-list').innerHTML = `
+                <div style="background:#0f172a; padding:18px; border-radius:10px; border:1px solid #334155;">
+                    <h3>Play 3 Matches</h3>
+                    <p style="color:#38bdf8; font-weight:bold; margin-top:5px;">Progress: ${gameData.friendlyMatchesPlayed} / 3</p>
+                </div>
+            `;
+        }
+
+        function showPreMatchLineup(type) {
+            currentMatchType = type;
+            document.getElementById('lineup-screen').style.display = 'flex';
+        }
+
+        function addCommentaryLine(speaker, text) {
+            let feed = document.getElementById('arena-commentary');
+            feed.innerHTML += `<div><strong>${speaker}:</strong> ${text}</div>`;
+            feed.scrollTop = feed.scrollHeight;
+            if ('speechSynthesis' in window) {
+                let utterance = new SpeechSynthesisUtterance(`${speaker} says: ${text}`);
+                utterance.rate = 1.1; window.speechSynthesis.speak(utterance);
+            }
+        }
+
+        function startActualMatch() {
+            document.getElementById('lineup-screen').style.display = 'none';
+            document.getElementById('match-overlay').style.display = 'flex';
+            document.getElementById('home-team-name').innerText = gameData.teamName || "User FC";
+            document.getElementById('arena-commentary').innerHTML = '';
+            
+            matchMinute = 0; homeScore = 0; awayScore = 0;
+            document.getElementById('hud-score').innerText = "0 - 0";
+            document.getElementById('hud-clock').innerText = "00:00";
+            document.getElementById('pitch-status').innerText = `Live at ${gameData.stadiumName}`;
+
+            setTimeout(() => { addCommentaryLine("Jon Champion", `Welcome live to ${gameData.stadiumName} under manager ${gameData.managerName}!`); }, 500);
+            setTimeout(() => {
+                addCommentaryLine("Peter Mukangai", "Hodi hodi wadau wote wa soka! Mechi imeanza rasmi!");
+                document.getElementById('pitch-status').innerText = "First Half Underway!";
+                runMatchTimer();
+            }, 3000);
+            }
+
+        function runMatchTimer() {
+            matchTimer = setInterval(() => {
+                matchMinute++;
+                document.getElementById('hud-clock').innerText = (matchMinute < 10 ? "0" + matchMinute : matchMinute) + ":00";
+
+                if(matchMinute === 25) {
+                    homeScore++;
+                    document.getElementById('hud-score').innerText = `${homeScore} - ${awayScore}`;
+                    addCommentaryLine("Peter Drury", `GOALLL! Absolute perfection! Haaland scores!`);
+                } else if(matchMinute === 45) {
+                    clearInterval(matchTimer);
+                    document.getElementById('pitch-status').innerText = "Half-Time Break";
+                    document.getElementById('halftime-overlay').style.display = 'flex';
+                }
+            }, 1500);
+        }
+
+        function resumeSecondHalf() {
+            document.getElementById('halftime-overlay').style.display = 'none';
+            document.getElementById('pitch-status').innerText = "Second Half Underway";
+            matchTimer = setInterval(() => {
+                matchMinute++;
+                document.getElementById('hud-clock').innerText = (matchMinute < 10 ? "0" + matchMinute : matchMinute) + ":00";
+
+                if(matchMinute === 90) {
+                    clearInterval(matchTimer);
+                    document.getElementById('pitch-status').innerText = "Full-Time!";
+                    
+                    if(currentMatchType === 'Ranked Division') {
+                        gameData.divWins++;
+                        if(gameData.divWins >= 3 && gameData.currentDivision > 1) {
+                            gameData.currentDivision--;
+                            gameData.divWins = 0;
+                            gameData.coins += 30; gameData.gp += 3000;
+                            alert(`🏆 PROMOTION! You advanced to Division ${gameData.currentDivision}!`);
+                        }
+                    }
+
+                    gameData.friendlyMatchesPlayed += 1;
+                    gameData.coins += gameData.winReward;
+                    gameData.gp += 2000;
+                    saveState(); initApp();
+
+                    setTimeout(() => {
+                        document.getElementById('motm-overlay').style.display = 'flex';
+                    }, 1000);
+                }
+            }, 1500);
+        }
+
+        function closeMatchAndCollectRewards() {
+            document.getElementById('match-overlay').style.display = 'none';
+        }
+
+        function createRoom() {
+            let code = "ROOM-" + Math.floor(1000 + Math.random() * 9000);
+            document.getElementById('room-code-display').innerText = `Room Code: ${code}`;
+        }
+
+        function joinRoom() {
+            let code = document.getElementById('join-code-input').value.trim();
+            if(!code) { alert("Enter room code!"); return; }
+            alert(`Joined room ${code}. Kickoff!`);
+            showPreMatchLineup('Friendly');
+        }
+
+        function buyMpesaOffer(item, amount, coinReward) {
+            let code = prompt(`M-Pesa Checkout\nSend KES ${amount} to 0797919257.\nEnter M-Pesa Code:`);
+            if(code && code.length > 5) {
+                gameData.coins += coinReward; saveState(); initApp();
+                alert(`M-Pesa payment confirmed successfully! +${coinReward} Coins added.`);
+            }
+        }
+
+        function buyPlayerOffer(playerName, amount, rating, pos, bonusCoins) {
+            let code = prompt(`M-Pesa Player Checkout\nSend KES ${amount} to 0797919257.\nEnter M-Pesa Code:`);
+            if(code && code.length > 5) {
+                gameData.coins += bonusCoins;
+                gameData.players.unshift({ name: playerName, pos: pos, rating: rating - 1, booster: true, epic: true, avatar: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=150", skills: ["Double Touch", "One-touch Pass"] });
+                saveState(); initApp(); calculateCollectiveStrength();
+                alert(`🎉 Boosted ${playerName} (${rating} OVR) added + ${bonusCoins} Coins!`);
+            }
+        }
+    </script>
+</body>
+</html>
